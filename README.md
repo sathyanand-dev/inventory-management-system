@@ -107,7 +107,3 @@ inventory-management-system/
 │       └── services/
 └── README.md
 ```
-
-## License
-
-MIT
