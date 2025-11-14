@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Box,
@@ -42,13 +42,9 @@ const ItemForm = () => {
   });
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    if (isEditMode) {
-      fetchItem();
-    }
-  }, [id]);
-
-  const fetchItem = async () => {
+  const fetchItem = useCallback(async () => {
+    if (!id) return;
+    
     try {
       setLoading(true);
       const response = await itemAPI.getById(id);
@@ -64,7 +60,13 @@ const ItemForm = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (isEditMode) {
+      fetchItem();
+    }
+  }, [isEditMode, fetchItem]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -43,7 +43,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 
 const InventoryList = () => {
   const navigate = useNavigate();
-  const { items, loading, pagination, filters, fetchItems, updateFilters } = useInventory();
+  const { items, loading, pagination, filters, fetchItems, updateFilters, updatePagination } = useInventory();
   const [deleteDialog, setDeleteDialog] = useState({ open: false, itemId: null, itemName: '' });
   const [viewDialog, setViewDialog] = useState({ open: false, item: null });
   const [showFilters, setShowFilters] = useState(false);
@@ -53,8 +53,8 @@ const InventoryList = () => {
   };
 
   const handleChangeRowsPerPage = (event) => {
-    updateFilters({ itemsPerPage: parseInt(event.target.value, 10) });
-    fetchItems(1);
+    updatePagination({ itemsPerPage: parseInt(event.target.value, 10) });
+    // No need to call fetchItems here - the context will handle it automatically
   };
 
   const handleSearch = (event) => {

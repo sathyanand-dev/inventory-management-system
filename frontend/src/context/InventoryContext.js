@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { itemAPI } from '../services/api';
 
 const InventoryContext = createContext();
@@ -28,15 +28,23 @@ export const InventoryProvider = ({ children }) => {
     sortBy: 'createdAt',
     sortOrder: 'desc',
   });
+  
+  const filtersRef = useRef(filters);
+  const debounceTimer = useRef(null);
+
+  // Update ref when filters change
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
 
   // Fetch items with current filters
-  const fetchItems = async (page = 1) => {
+  const fetchItems = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const params = {
         page,
         limit: pagination.itemsPerPage,
-        ...filters,
+        ...filtersRef.current,
       };
       
       const response = await itemAPI.getAll(params);
@@ -47,15 +55,20 @@ export const InventoryProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.itemsPerPage]);
 
   // Update filters and fetch
-  const updateFilters = (newFilters) => {
+  const updateFilters = useCallback((newFilters) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
-  };
+  }, []);
+
+  // Update pagination
+  const updatePagination = useCallback((newPagination) => {
+    setPagination((prev) => ({ ...prev, ...newPagination }));
+  }, []);
 
   // Reset filters
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setFilters({
       search: '',
       category: '',
@@ -64,12 +77,29 @@ export const InventoryProvider = ({ children }) => {
       sortBy: 'createdAt',
       sortOrder: 'desc',
     });
-  };
+  }, []);
 
-  // Refresh items when filters change
+  // Refresh items when filters change with debounce
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    
+    debounceTimer.current = setTimeout(() => {
+      fetchItems(1);
+    }, 300);
+    
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [filters, fetchItems]);
+
+  // Refresh items when itemsPerPage changes (no debounce needed)
   useEffect(() => {
     fetchItems(1);
-  }, [filters]);
+  }, [pagination.itemsPerPage, fetchItems]);
 
   const value = {
     items,
@@ -78,6 +108,7 @@ export const InventoryProvider = ({ children }) => {
     filters,
     fetchItems,
     updateFilters,
+    updatePagination,
     resetFilters,
     setItems,
   };
