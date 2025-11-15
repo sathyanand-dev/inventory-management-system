@@ -5,13 +5,15 @@ const errorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.code = err.code || 'INTERNAL_ERROR';
 
-  // Log error for debugging
-  console.error('ERROR:', {
-    message: err.message,
-    code: err.code,
-    statusCode: err.statusCode,
-    stack: err.stack
-  });
+  // Log error only in development
+  if (process.env.NODE_ENV !== 'production') {
+    console.error('ERROR:', {
+      message: err.message,
+      code: err.code,
+      statusCode: err.statusCode,
+      stack: err.stack
+    });
+  }
 
   // Send error response
   res.status(err.statusCode).json({

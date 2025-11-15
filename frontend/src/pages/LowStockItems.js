@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -9,7 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  IconButton,
   Typography,
   CircularProgress,
   Chip,
@@ -33,25 +32,22 @@ const LowStockItems = () => {
   const [loading, setLoading] = useState(true);
   const [threshold, setThreshold] = useState(10);
 
-  useEffect(() => {
-    fetchLowStockItems();
-  }, [threshold]);
-
-  const fetchLowStockItems = async () => {
+  const fetchLowStockItems = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('Fetching low stock items with threshold:', threshold);
       const response = await itemAPI.getLowStock(threshold);
-      console.log('Low stock response:', response);
       // Response structure: { success, data: { items, count, threshold } }
       setItems(response.data.items || []);
     } catch (error) {
-      console.error('Error fetching low stock items:', error);
       setItems([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [threshold]);
+
+  useEffect(() => {
+    fetchLowStockItems();
+  }, [fetchLowStockItems]);
 
   const getStockStatus = (quantity) => {
     if (quantity === 0) return { label: 'Out of Stock', color: 'error' };

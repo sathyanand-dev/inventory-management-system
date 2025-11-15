@@ -15,22 +15,25 @@ exports.protect = async (req, res, next) => {
       return next(new AppError('Not authorized to access this route', 401, 'UNAUTHORIZED'));
     }
 
-    try {
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-change-in-production');
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined in environment variables');
+    }
 
-      // Get user from token
-      req.user = await User.findById(decoded.id);
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      if (!req.user) {
-        return next(new AppError('User not found', 404, 'USER_NOT_FOUND'));
-      }
+    // Get user from token
+    req.user = await User.findById(decoded.id);
 
-      next();
-    } catch (error) {
+    if (!req.user) {
+      return next(new AppError('User not found', 404, 'USER_NOT_FOUND'));
+    }
+
+    next();
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
       return next(new AppError('Not authorized to access this route', 401, 'UNAUTHORIZED'));
     }
-  } catch (error) {
     next(error);
   }
 };

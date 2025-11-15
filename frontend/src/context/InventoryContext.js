@@ -79,7 +79,7 @@ export const InventoryProvider = ({ children }) => {
     });
   }, []);
 
-  // Refresh items when filters change with debounce
+  // Refresh items when filters or itemsPerPage change
   useEffect(() => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
@@ -94,12 +94,7 @@ export const InventoryProvider = ({ children }) => {
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [filters, fetchItems]);
-
-  // Refresh items when itemsPerPage changes (no debounce needed)
-  useEffect(() => {
-    fetchItems(1);
-  }, [pagination.itemsPerPage, fetchItems]);
+  }, [filters, pagination.itemsPerPage, fetchItems]);
 
   const value = {
     items,

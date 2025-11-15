@@ -180,13 +180,9 @@ const getDashboardStats = asyncHandler(async (req, res, next) => {
 const getLowStockItems = asyncHandler(async (req, res, next) => {
   const { threshold = 10 } = req.query;
   
-  console.log('Low stock request received with threshold:', threshold);
-  
   const lowStockItems = await Item.find({ 
     quantity: { $lt: Number(threshold) } 
   }).sort({ quantity: 1 });
-
-  console.log('Found low stock items:', lowStockItems.length);
 
   res.json({
     success: true,

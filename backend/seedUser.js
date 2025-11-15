@@ -5,7 +5,7 @@ const User = require('./models/user.model');
 const seedUser = async () => {
   try {
     const uri = process.env.ATLAS_URI;
-    await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    await mongoose.connect(uri);
     console.log('MongoDB connected...');
 
     // Check if user already exists

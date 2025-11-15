@@ -31,13 +31,15 @@ apiClient.interceptors.response.use(
   (error) => {
     const errorMessage = error.response?.data?.error?.message || 'An error occurred';
     
-    // Handle unauthorized errors
-    if (error.response?.status === 401) {
+    // Handle unauthorized errors (but not for login/register attempts)
+    if (error.response?.status === 401 && !error.config.url.includes('/auth/')) {
       localStorage.removeItem('token');
       window.location.href = '/login';
+      toast.error('Session expired. Please login again.');
+    } else {
+      toast.error(errorMessage);
     }
     
-    toast.error(errorMessage);
     return Promise.reject(error);
   }
 );

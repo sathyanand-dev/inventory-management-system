@@ -1,42 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Button,
-  TextField,
-  Typography,
-  CircularProgress,
-  Chip,
-  InputAdornment,
-  Grid,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Divider,
-} from '@mui/material';
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Search as SearchIcon,
-  FilterList as FilterIcon,
-  Visibility as VisibilityIcon,
-  Close as CloseIcon,
-} from '@mui/icons-material';
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, IconButton, Button, TextField, Typography, CircularProgress, Chip, InputAdornment, Grid, MenuItem, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Divider, Alert } from '@mui/material';
+import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Search as SearchIcon, FilterList as FilterIcon, Visibility as VisibilityIcon, Close as CloseIcon } from '@mui/icons-material';
 import { useInventory } from '../context/InventoryContext';
 import { itemAPI } from '../services/api';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -47,6 +12,7 @@ const InventoryList = () => {
   const [deleteDialog, setDeleteDialog] = useState({ open: false, itemId: null, itemName: '' });
   const [viewDialog, setViewDialog] = useState({ open: false, item: null });
   const [showFilters, setShowFilters] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   const handleChangePage = (event, newPage) => {
     fetchItems(newPage + 1);
@@ -54,7 +20,6 @@ const InventoryList = () => {
 
   const handleChangeRowsPerPage = (event) => {
     updatePagination({ itemsPerPage: parseInt(event.target.value, 10) });
-    // No need to call fetchItems here - the context will handle it automatically
   };
 
   const handleSearch = (event) => {
@@ -63,15 +28,17 @@ const InventoryList = () => {
 
   const handleDelete = async () => {
     try {
+      setDeleteError(null);
       await itemAPI.delete(deleteDialog.itemId);
       setDeleteDialog({ open: false, itemId: null, itemName: '' });
       fetchItems(pagination.currentPage);
     } catch (error) {
-      console.error('Error deleting item:', error);
+      setDeleteError(error.response?.data?.message || 'Failed to delete item');
     }
   };
 
   const openDeleteDialog = (id, name) => {
+    setDeleteError(null);
     setDeleteDialog({ open: true, itemId: id, itemName: name });
   };
 
@@ -279,9 +246,21 @@ const InventoryList = () => {
       <ConfirmDialog
         open={deleteDialog.open}
         title="Delete Item"
-        message={`Are you sure you want to delete "${deleteDialog.itemName}"? This action cannot be undone.`}
+        message={
+          <>
+            {deleteError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {deleteError}
+              </Alert>
+            )}
+            Are you sure you want to delete "{deleteDialog.itemName}"? This action cannot be undone.
+          </>
+        }
         onConfirm={handleDelete}
-        onCancel={() => setDeleteDialog({ open: false, itemId: null, itemName: '' })}
+        onCancel={() => {
+          setDeleteError(null);
+          setDeleteDialog({ open: false, itemId: null, itemName: '' });
+        }}
       />
 
       {/* View Item Dialog */}

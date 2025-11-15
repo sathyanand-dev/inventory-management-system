@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Box,
-  Paper,
   TextField,
   Button,
   Typography,
@@ -18,7 +17,6 @@ import {
   Save as SaveIcon,
   Cancel as CancelIcon,
   Inventory as InventoryIcon,
-  AttachMoney as MoneyIcon,
   Numbers as NumbersIcon,
   Category as CategoryIcon,
   Description as DescriptionIcon,

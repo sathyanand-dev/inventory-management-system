@@ -4,26 +4,39 @@ A full-stack inventory management application built with the MERN stack.
 
 ## Features
 
-- User authentication with JWT
-- Dashboard with inventory statistics
-- CRUD operations for inventory items
-- Low stock alerts
-- Search and filter functionality
-- Responsive design with Material-UI
+- Add, view, update, and delete inventory items with ₹ (INR) currency
+- User authentication with JWT (7-day token expiration)
+- Role-based access control with protected routes
+- Low stock alerts with configurable threshold (default: 10 units)
+- Advanced search and filtering (by name, category, stock level)
+- Pagination support for large inventories
+- Responsive design with mobile drawer navigation
+- Real-time error handling and user feedback with toast notifications
+- Input validation at frontend, middleware, and database levels
+- RESTful API with comprehensive error handling
+- Graceful server shutdown handling
 
 ## Tech Stack
 
 **Frontend:**
-- React.js
-- Material-UI
+- React 19.2.0
+- Material-UI v7
+- React Router v7
 - Context API
 - Axios
+- React Toastify
 
 **Backend:**
 - Node.js
-- Express.js
-- MongoDB
-- JWT Authentication
+- Express 5.1.0
+- MongoDB with Mongoose 8.19.3
+- JWT (jsonwebtoken 9.0.2)
+- bcryptjs 3.0.3
+
+**Architecture:**
+- Three-layer validation (Frontend → Middleware → Database)
+- Custom error handling with AppError class
+- Database indexes for optimized queries
 
 ## Installation
 
@@ -42,7 +55,7 @@ npm install
 Create a `.env` file in the backend directory:
 
 ```env
-MONGODB_URI=your_mongodb_connection_string
+ATLAS_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
 PORT=5000
 ```
@@ -58,6 +71,19 @@ npm start
 ```bash
 cd frontend
 npm install
+```
+
+Create a `.env` file in the frontend directory:
+
+```env
+REACT_APP_API_URL=http://localhost:5000
+```
+
+**Note:** Update the URL for production deployment.
+
+Start the frontend:
+
+```bash
 npm start
 ```
 
@@ -74,18 +100,18 @@ Role: Inventory Manager
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user
+- `POST /auth/register` - Register new user
+- `POST /auth/login` - Login user
+- `GET /auth/me` - Get current user
 
 ### Items
-- `GET /api/items` - Get all items
-- `GET /api/items/:id` - Get single item
-- `POST /api/items` - Create item
-- `PUT /api/items/:id` - Update item
-- `DELETE /api/items/:id` - Delete item
-- `GET /api/items/stats` - Get dashboard stats
-- `GET /api/items/low-stock` - Get low stock items
+- `GET /items` - Get all items (supports pagination, search, filters)
+- `GET /items/:id` - Get single item
+- `POST /items` - Create item
+- `PUT /items/:id` - Update item
+- `DELETE /items/:id` - Delete item
+- `GET /items/stats` - Get dashboard stats
+- `GET /items/low-stock` - Get low stock items
 
 ## Project Structure
 

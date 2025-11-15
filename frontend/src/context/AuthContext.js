@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { authAPI } from '../services/api';
 
 const AuthContext = createContext();
@@ -16,18 +16,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
-  useEffect(() => {
-    if (token) {
-      loadUser();
-    } else {
-      setLoading(false);
-    }
-  }, [token]);
-
-  const loadUser = async () => {
+  const loadUser = useCallback(async () => {
     try {
       const data = await authAPI.getMe();
-      console.log('Load user response:', data); // Debug log
       // authAPI.getMe returns response.data which contains { success, user }
       setUser(data.user);
     } catch (error) {
@@ -37,12 +28,19 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      loadUser();
+    } else {
+      setLoading(false);
+    }
+  }, [token, loadUser]);
 
   const login = async (email, password) => {
     try {
       const data = await authAPI.login(email, password);
-      console.log('Login response:', data); // Debug log
       
       // authAPI.login returns response.data which contains { success, token, user }
       const { token: authToken, user: authUser } = data;
@@ -65,7 +63,6 @@ export const AuthProvider = ({ children }) => {
   const register = async (username, email, password) => {
     try {
       const data = await authAPI.register(username, email, password);
-      console.log('Register response:', data); // Debug log
       
       // authAPI.register returns response.data which contains { success, token, user }
       const { token: authToken, user: authUser } = data;

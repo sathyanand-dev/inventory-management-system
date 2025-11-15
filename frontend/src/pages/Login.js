@@ -13,6 +13,7 @@ import {
   Tabs,
   CircularProgress,
   Divider,
+  Alert,
 } from '@mui/material';
 import {
   Email as EmailIcon,
@@ -43,10 +44,12 @@ const Login = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState('');
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     setErrors({});
+    setServerError('');
   };
 
   const handleLoginChange = (e) => {
@@ -54,6 +57,7 @@ const Login = () => {
     if (errors[e.target.name]) {
       setErrors({ ...errors, [e.target.name]: '' });
     }
+    if (serverError) setServerError('');
   };
 
   const handleRegisterChange = (e) => {
@@ -61,6 +65,7 @@ const Login = () => {
     if (errors[e.target.name]) {
       setErrors({ ...errors, [e.target.name]: '' });
     }
+    if (serverError) setServerError('');
   };
 
   const validateLogin = () => {
@@ -89,10 +94,12 @@ const Login = () => {
 
     try {
       setLoading(true);
+      setServerError('');
       await login(loginData.email, loginData.password);
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
+      setServerError(error.response?.data?.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
@@ -104,10 +111,12 @@ const Login = () => {
 
     try {
       setLoading(true);
+      setServerError('');
       await register(registerData.username, registerData.email, registerData.password);
       navigate('/');
     } catch (error) {
       console.error('Register error:', error);
+      setServerError(error.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -180,6 +189,11 @@ const Login = () => {
           {/* Login Form */}
           {activeTab === 0 && (
             <form onSubmit={handleLoginSubmit}>
+              {serverError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {serverError}
+                </Alert>
+              )}
               <TextField
                 fullWidth
                 label="Email"
@@ -248,6 +262,11 @@ const Login = () => {
           {/* Register Form */}
           {activeTab === 1 && (
             <form onSubmit={handleRegisterSubmit}>
+              {serverError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {serverError}
+                </Alert>
+              )}
               <TextField
                 fullWidth
                 label="Username"

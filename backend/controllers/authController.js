@@ -4,7 +4,10 @@ const AppError = require('../utils/AppError');
 
 // Generate JWT token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'your-secret-key-change-in-production', {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined in environment variables');
+  }
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: '7d',
   });
 };
