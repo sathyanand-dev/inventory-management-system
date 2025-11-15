@@ -2,7 +2,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 const AppError = require('../utils/AppError');
 
-// Generate JWT token
+// Generate JWT token with 7-day expiration
+// We chose 7 days to balance security with user convenience
 const generateToken = (id) => {
   if (!process.env.JWT_SECRET) {
     throw new Error('JWT_SECRET is not defined in environment variables');
@@ -19,7 +20,8 @@ exports.register = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
 
-    // Check if user already exists
+    // Check if user already exists by email or username
+    // Using $or to prevent duplicate registrations with either field
     const userExists = await User.findOne({ $or: [{ email }, { username }] });
     if (userExists) {
       return next(new AppError('User already exists', 400, 'USER_EXISTS'));
@@ -63,13 +65,13 @@ exports.login = async (req, res, next) => {
       return next(new AppError('Please provide email and password', 400, 'VALIDATION_ERROR'));
     }
 
-    // Find user
+    // Find user and explicitly include password field (it's excluded by default for security)
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return next(new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS'));
     }
 
-    // Check password
+    // Compare provided password with hashed password using bcrypt
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       return next(new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS'));

@@ -3,7 +3,8 @@ import { toast } from 'react-toastify';
 
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-// Create axios instance with default config
+// Create axios instance with base configuration
+// All API calls will use this instance to get consistent behavior
 const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -11,7 +12,8 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor to add token
+// Request interceptor - automatically adds JWT token to every request
+// This way we don't need to manually add Authorization header everywhere
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -25,13 +27,14 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling
+// Response interceptor for centralized error handling
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const errorMessage = error.response?.data?.error?.message || 'An error occurred';
     
-    // Handle unauthorized errors (but not for login/register attempts)
+    // Handle unauthorized errors but exclude auth endpoints
+    // This prevents logout on wrong login attempts while still catching expired tokens
     if (error.response?.status === 401 && !error.config.url.includes('/auth/')) {
       localStorage.removeItem('token');
       window.location.href = '/login';

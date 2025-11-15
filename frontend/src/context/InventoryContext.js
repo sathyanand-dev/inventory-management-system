@@ -32,12 +32,14 @@ export const InventoryProvider = ({ children }) => {
   const filtersRef = useRef(filters);
   const debounceTimer = useRef(null);
 
-  // Update ref when filters change
+  // Keep ref in sync with filters state
+  // Using ref prevents unnecessary re-renders when filters change
   useEffect(() => {
     filtersRef.current = filters;
   }, [filters]);
 
-  // Fetch items with current filters
+  // Fetch items with current filters and pagination
+  // Using useCallback to prevent unnecessary re-renders
   const fetchItems = useCallback(async (page = 1) => {
     try {
       setLoading(true);

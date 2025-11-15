@@ -1,6 +1,7 @@
 const AppError = require('../utils/AppError');
 
-// Validation middleware
+// Validation middleware - second layer of defense (frontend validates first, model validates last)
+// This catches malicious requests that bypass frontend validation
 const validateItem = (req, res, next) => {
   const { itemName, quantity, price, description, category } = req.body;
 
@@ -54,7 +55,8 @@ const validateItem = (req, res, next) => {
     return next(new AppError('Price cannot exceed 10,000,000', 400, 'VALIDATION_ERROR'));
   }
 
-  // Sanitize and normalize data
+  // Sanitize and normalize data before it reaches the database
+  // Trimming removes extra spaces and converting to numbers ensures type safety
   req.body.itemName = itemName.trim();
   req.body.quantity = quantityNum;
   req.body.price = priceNum;

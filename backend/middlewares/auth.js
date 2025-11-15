@@ -6,7 +6,7 @@ exports.protect = async (req, res, next) => {
   try {
     let token;
 
-    // Check for token in headers
+    // Extract JWT token from Authorization header (format: "Bearer <token>")
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
@@ -19,10 +19,11 @@ exports.protect = async (req, res, next) => {
       throw new Error('JWT_SECRET is not defined in environment variables');
     }
 
-    // Verify token
+    // Verify token signature and expiration
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Get user from token
+    // Attach user to request object so controllers can access it
+    // This ensures the user still exists in database
     req.user = await User.findById(decoded.id);
 
     if (!req.user) {

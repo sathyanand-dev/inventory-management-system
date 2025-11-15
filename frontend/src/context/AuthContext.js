@@ -16,6 +16,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
+  // Load user data from backend using stored token
+  // This runs on app startup to restore user session
   const loadUser = useCallback(async () => {
     try {
       const data = await authAPI.getMe();

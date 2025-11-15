@@ -12,7 +12,7 @@ app.use(express.json());
 
 const uri = process.env.ATLAS_URI;
 
-// Connect to MongoDB
+// Connect to MongoDB Atlas - no need for deprecated options in Mongoose 8.x
 mongoose.connect(uri)
   .then(() => {
     if (process.env.NODE_ENV !== 'production') {
@@ -21,7 +21,7 @@ mongoose.connect(uri)
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error.message);
-    process.exit(1);
+    process.exit(1); // Exit if database connection fails
   });
 
 const connection = mongoose.connection;
@@ -30,10 +30,10 @@ const authRouter = require('./routes/auth');
 const itemsRouter = require('./routes/items');
 const { protect } = require('./middlewares/auth');
 
-// Public routes
+// Public routes - anyone can register or login
 app.use('/auth', authRouter);
 
-// Protected routes
+// Protected routes - requires valid JWT token
 app.use('/items', protect, itemsRouter);
 
 // Error handling middleware (must be last)
@@ -45,7 +45,8 @@ const server = app.listen(port, () => {
   }
 });
 
-// Graceful shutdown
+// Graceful shutdown - ensures database connections close properly before server stops
+// This prevents data corruption and handles deployment scenarios cleanly
 process.on('SIGTERM', () => {
   console.log('SIGTERM signal received: closing HTTP server');
   server.close(() => {

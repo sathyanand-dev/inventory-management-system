@@ -3,6 +3,8 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Box, CircularProgress } from '@mui/material';
 
+// Protects routes from unauthenticated access
+// Shows loading spinner while checking auth, redirects to login if not authenticated
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 

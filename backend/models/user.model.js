@@ -35,10 +35,12 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// Hash password before saving
+// Hash password before saving to database
+// Only runs when password is modified to avoid re-hashing on every save
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   
+  // Generate salt with 10 rounds - good balance between security and performance
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
